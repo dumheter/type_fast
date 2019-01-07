@@ -1,0 +1,6 @@
+[submodule "type_fast/source/thirdparty/dutil"]
+	path = type_fast/source/thirdparty/dutil
+	url = https://github.com/dumheter/dutil
+[submodule "type_fast/source/thirdparty/--force"]
+	path = type_fast/source/thirdparty/--force
+	url = https://github.com/dumheter/dutil
