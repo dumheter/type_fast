@@ -35,30 +35,35 @@
 // Class
 // ============================================================ //
 
+namespace tf
+{
+
 enum class Inputbox_style
 {
-  standard,
-  minimal
+    standard,
+    minimal
 };
 
 class Inputbox
 {
 public:
-  Inputbox(Rectangle rect, Inputbox_style style, Font* font);
+    Inputbox(Rectangle rect, Inputbox_style style, Font* font);
 
-  void update(int key);
+    void update(int key);
 
-  void draw();
+    void draw();
 
-  char* get_text() const { return m_text; }
+    char* get_text() const { return m_text; }
 
 private:
-  static constexpr int m_text_size = 256;
-  int m_text_pos = 0;
-  char* m_text;
-  Inputbox_style m_style;
-  Rectangle m_rect;
-  Font* m_font;
+    static constexpr int m_text_size = 256;
+    int m_text_pos = 0;
+    char* m_text;
+    Inputbox_style m_style;
+    Rectangle m_rect;
+    Font* m_font;
 };
+
+}
 
 #endif//__INPUTBOX_HPP__

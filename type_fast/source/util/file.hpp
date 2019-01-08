@@ -38,31 +38,31 @@
 
 namespace tf
 {
-  enum class FileError : int
-  {
+enum class FileError : int
+{
     UNKNOWN_ERROR = 0,
     NO_ERROR,
     CANNOT_OPEN_PATH,
     FAILED_TO_SEEK,
     FAILED_TO_READ,
     FAILED_TO_GET_POS
-  };
+};
 
-  /**
-   * Read a file from disk.
-   *
-   * Usage:
-   * 1. Create the object with a valid path.
-   * 2. Check that it does not has_error().
-   * 3. Read from the buffer with get()
-   */
-  class File
-  {
-  public:
+/**
+ * Read a file from disk.
+ *
+ * Usage:
+ * 1. Create the object with a valid path.
+ * 2. Check that it does not has_error().
+ * 3. Read from the buffer with get()
+ */
+class File
+{
+public:
     explicit File(const std::string& path);
-    
+
     ~File();
-    
+
     bool has_error() const { return m_error != FileError::NO_ERROR; }
 
     const char* get() const { return m_buf; }
@@ -71,11 +71,12 @@ namespace tf
 
     std::string error_to_string() const;
 
-  private:
+private:
     FileError m_error = FileError::UNKNOWN_ERROR;
     char* m_buf = nullptr;
     size_t m_size = 0;
-  };
+};
+
 }
 
 #endif//__FILE_HPP__

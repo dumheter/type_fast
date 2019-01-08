@@ -28,6 +28,7 @@
 
 namespace tf
 {
+
 Word_generator::Word_generator(const File& file, const DelimSettings& settings)
 {
     load(file, settings);
@@ -61,4 +62,5 @@ std::string Word_generator::next()
 {
     return m_strlist[m_dist(m_re)];
 }
+
 }

@@ -31,12 +31,13 @@
 
 namespace tf
 {
-  /**
-   * Convert a char string to wchar string.
-   * Thx Filip!
-   */
-  static wchar_t* lnUTF8ToUTF16(const char* string)
-  {
+
+/**
+ * Convert a char string to wchar string.
+ * Thx Filip!
+ */
+static wchar_t* lnUTF8ToUTF16(const char* string)
+{
     // if the string is NULL then return
     if (!string) { return NULL; }
 
@@ -46,13 +47,13 @@ namespace tf
 
     // Get the length of the converted string
     const int32_t convertedLength = MultiByteToWideChar(
-      CP_UTF8,
-      MB_ERR_INVALID_CHARS,
-      string,
-      (int32_t)byteCount,
-      NULL,
-      0
-      );
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        string,
+        (int32_t)byteCount,
+        NULL,
+        0
+        );
 
     // Assert that the string can be converted
     assert(convertedLength > 0 && "Invalid UTF-8 string");
@@ -63,27 +64,27 @@ namespace tf
 
     // Convert the string
     MultiByteToWideChar(
-      CP_UTF8,
-      MB_ERR_INVALID_CHARS,
-      string,
-      (int32_t)byteCount,
-      buffer,
-      convertedLength
-      );
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        string,
+        (int32_t)byteCount,
+        buffer,
+        convertedLength
+        );
 
     // Return the utf16 string
     return buffer;
-  }
-  
-  void shellexec(const char* cmd)
-  {
+}
+
+void shellexec(const char* cmd)
+{
     auto wincmd = lnUTF8ToUTF16(cmd);
     ShellExecuteW(NULL, L"open", wincmd, NULL, NULL, 0);
     free(wincmd);
-  }
+}
 
-  void fix_console()
-  {
+void fix_console()
+{
     // Set console encoding
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -93,5 +94,6 @@ namespace tf
     DWORD mode;
     GetConsoleMode(out, &mode);
     SetConsoleMode(out, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-  }
+}
+
 }

@@ -27,12 +27,14 @@
 
 namespace tf
 {
-  void shellexec(const char* cmd);
 
-  /**
-   * Thx filip
-   */
-  void fix_console();
+void shellexec(const char* cmd);
+
+/**
+ * Thx filip
+ */
+void fix_console();
+
 }
 
 #endif//__WIN_HPP__

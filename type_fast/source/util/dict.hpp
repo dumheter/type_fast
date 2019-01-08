@@ -40,20 +40,20 @@
 
 namespace tf
 {
-  
-  class Dict
-  {
-  public:
-    
-  public:
+
+class Dict
+{
+public:
+
+public:
     Dict(const File& file, const DelimSettings& settings);
 
-    const std::unordered_set<std::string>& get() const { return m_set; } 
+    const std::unordered_set<std::string>& get() const { return m_set; }
 
-  private:
+private:
     std::unordered_set<std::string> m_set;
-    
-  };
+
+};
 }
 
 #endif//__DICT_HPP__

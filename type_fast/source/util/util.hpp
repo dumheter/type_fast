@@ -25,31 +25,23 @@
 #ifndef __UTIL_HPP__
 #define __UTIL_HPP__
 
-// ============================================================ //
-// Headers
-// ============================================================ //
-
-
-
-// ============================================================ //
-// Class
-// ============================================================ //
-
 namespace tf
 {
-  template <typename T>
-  inline T clamp(T val, T min, T max)
-  {
+
+template <typename T>
+inline T clamp(T val, T min, T max)
+{
     if (val >= min && val <= max) return val;
     else if (val < min) return min;
     else /*if (val > max)*/ return max;
-  }
+}
 
-  template <typename T>
-  inline bool inside(T val, T min, T max)
-  {
+template <typename T>
+inline bool inside(T val, T min, T max)
+{
     return val >= min && val <= max;
-  }
+}
+
 }
 
 #endif//__UTIL_HPP__

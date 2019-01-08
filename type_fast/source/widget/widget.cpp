@@ -33,6 +33,7 @@
 
 namespace tf
 {
+
 constexpr float text_spacing = 0;
 
 // ============================================================ //
@@ -394,4 +395,5 @@ void widget_debug_print_sizes()
     printf("= Input_box<T>\t%zi\n", sizeof(Input_box<Word>) - sizeof(Word));
     printf("===\n");
 }
+
 }

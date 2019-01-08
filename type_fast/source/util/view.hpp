@@ -37,12 +37,14 @@
 
 namespace tf
 {
-  template <typename T>
-  struct View
-  {
+
+template <typename T>
+struct View
+{
     const T* begin;
     const T* end;
-  };
+};
+
 }
 
 #endif//__VIEW_HPP__

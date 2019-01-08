@@ -34,13 +34,13 @@
 #include "file.hpp"
 #include "../thirdparty/filip/unicode.h"
 
-
 // ============================================================ //
 // Class
 // ============================================================ //
 
 namespace tf
 {
+
 class Word_generator
 {
 public:
@@ -72,6 +72,7 @@ private:
     std::default_random_engine m_re{m_rd()};
     std::uniform_int_distribution<long> m_dist;
 };
+
 }
 
 #endif//__WORD_GENERATOR_HPP__

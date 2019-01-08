@@ -29,22 +29,22 @@
 
 namespace tf
 {
-  Dict::Dict(const File& file, const DelimSettings& settings)
-  {
+Dict::Dict(const File& file, const DelimSettings& settings)
+{
     const char* text = file.get();
     const auto text_size = file.size();
-    
+
     u64 end, offset = 0;
     while (offset < text_size) {
-      bool valid = lnUTF8FindWord(text, &settings, &offset, &end);
-      assert(valid && "failed to parse word");
-      std::string str{text+offset, static_cast<size_t>((end+1) - offset)};
-      if (settings.only_lowercase) {
-        lnUTF8ToLower(&str[0], static_cast<int>(str.size()));
-      }
-      m_set.insert(std::move(str));
+        bool valid = lnUTF8FindWord(text, &settings, &offset, &end);
+        assert(valid && "failed to parse word");
+        std::string str{text+offset, static_cast<size_t>((end+1) - offset)};
+        if (settings.only_lowercase) {
+            lnUTF8ToLower(&str[0], static_cast<int>(str.size()));
+        }
+        m_set.insert(std::move(str));
 
-      offset = end + 1;
+        offset = end + 1;
     }
-  }
+}
 }

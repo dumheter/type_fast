@@ -144,18 +144,17 @@ private:
     // ============================================================ //
     // Game Objects
     // ============================================================ //
-
     tf::Input_box<tf::Text_input<tf::Word>> m_input_box;
 
-    std::vector<tf::Word> buf_word;
-    std::vector<tf::Text> buf_text;
-    std::vector<tf::Word_formatter> buf_word_formatter;
+    std::vector<tf::Word> words;
+    std::vector<tf::Text> texts;
+    std::vector<tf::Word_formatter> word_formatters;
     using H_scroll_hl_word = tf::H_scroll<tf::Text_highlightable<tf::Word>>;
-    std::unordered_map<std::string, H_scroll_hl_word> map_h_scroll;
-    std::vector<tf::Rect> buf_rect;
-    std::vector<tf::Button<tf::Word>> buf_button;
-    std::vector<tf::Slider> buf_slider;
-    std::vector<tf::H_scroll<tf::Rect>> buf_hscroll_rect;
+    std::unordered_map<std::string, H_scroll_hl_word> hscroll_words;
+    std::vector<tf::Rect> rects;
+    std::vector<tf::Button<tf::Word>> buttons;
+    std::vector<tf::Slider> sliders;
+    std::vector<tf::H_scroll<tf::Rect>> hscroll_rects;
 };
 
 }
