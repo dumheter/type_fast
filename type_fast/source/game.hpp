@@ -30,7 +30,24 @@
 // ============================================================ //
 
 #include <raylib.h>
+#include <cmath>
+#include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cassert>
+#include <random>
+#include <functional>
+#include "util/color.hpp"
+#include "util/util.hpp"
+#include "util/file.hpp"
+#include "util/dict.hpp"
 #include "util/view.hpp"
+#include "util/word_generator.hpp"
+#include "widget/widget.hpp"
+#include "widget/inputbox.hpp"
+#include "thirdparty/filip/unicode.h"
+#include "thirdparty/dutil/stopwatch.hpp"
 
 // ============================================================ //
 // Class
@@ -38,25 +55,109 @@
 
 namespace tf
 {
+
+enum class Event
+{
+    // Press enter in inputbox.
+    text_input,
+    // When a word scrolls off the screen.
+    word_death
+};
+
+class Game
+{
+    // ============================================================ //
+    // Singleton
+    // ============================================================ //
+private:
+    Game() = default;
+
+public:
+    static Game& instance() { static Game game{}; return game; }
+
+    Game(const Game& other) = delete;
+    Game& operator=(const Game& other) = delete;
+
     /**
-     * Mainly holds global state, also does some setup.
+     * Call before closing the program.
      */
-    class Game
-    {
-    public:
-        Game(int width, int height, const char* title, int target_fps);
+    void cleanup();
 
-        int width() const { return m_width; }
-        int height() const { return m_height; }
+    /**
+     * Main loop.
+     */
+    void run();
 
-        inline void set_inputbox(View<char> inputbox_view) { m_inputbox_view = inputbox_view; }
-        inline View<char> inputbox() const { return m_inputbox_view; }
+    // ============================================================ //
+    // Setup
+    // ============================================================ //
+    /**
+     * Call once before doing anything else.
+     */
+    void setup(int width, int height, const char* title, int target_fps,
+                      const char* font, const char* text_file);
 
-    private:
-        View<char> m_inputbox_view{};
-        int m_width;
-        int m_height;
-    };
+    void setup_start_objects();
+
+    // ============================================================ //
+    // Update
+    // ============================================================ //
+    void update();
+
+    void spawn_word();
+
+    // ============================================================ //
+    // Draw
+    // ============================================================ //
+    void draw();
+
+    // ============================================================ //
+    // Modifiers
+    // ============================================================ //
+    void load_word_generator(const char* wordfile);
+
+    // ============================================================ //
+    // Lookup
+    // ============================================================ //
+    int width() const { return instance().m_width; }
+    int height() const { return instance().m_height; }
+
+    // ============================================================ //
+    // Misc
+    // ============================================================ //
+
+
+
+    // ============================================================ //
+    // Private
+    // ============================================================ //
+private:
+    int m_width;
+    int m_height;
+    Font m_font;
+    Word_generator m_wordgen{};
+    std::random_device m_rd{};
+    std::default_random_engine m_re{m_rd()};
+    double m_wpm_timer;
+    const int* m_wpm_view;
+
+    // ============================================================ //
+    // Game Objects
+    // ============================================================ //
+
+    tf::Input_box<tf::Text_input<tf::Word>> m_input_box;
+
+    std::vector<tf::Word> buf_word;
+    std::vector<tf::Text> buf_text;
+    std::vector<tf::Word_formatter> buf_word_formatter;
+    using H_scroll_hl_word = tf::H_scroll<tf::Text_highlightable<tf::Word>>;
+    std::unordered_map<std::string, H_scroll_hl_word> map_h_scroll;
+    std::vector<tf::Rect> buf_rect;
+    std::vector<tf::Button<tf::Word>> buf_button;
+    std::vector<tf::Slider> buf_slider;
+    std::vector<tf::H_scroll<tf::Rect>> buf_hscroll_rect;
+};
+
 }
 
 #endif//__GAME_HPP__

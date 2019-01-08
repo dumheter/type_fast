@@ -28,33 +28,37 @@
 
 namespace tf
 {
-  Word_generator::Word_generator(const File& file, const DelimSettings& settings)
-    : m_re(m_rd())
-  {
-    const char* text = file.get();
-    const long text_size = file.size();
-    m_strlist.reserve(text_size/4); // might use extra space, but we can afford it
-    
-    u64 end, offset = 0;
-    while ((long)offset < text_size) {
-      bool valid = lnUTF8FindWord(text, &settings, &offset, &end);
-      assert(valid && "failed to parse word");
-      std::string str{text+offset, static_cast<size_t>((end+1) - offset)};
-      if (settings.only_lowercase) {
-        lnUTF8ToLower(&str[0], static_cast<int>(str.size()));
-      }
-      m_strlist.push_back(std::move(str));
+Word_generator::Word_generator(const File& file, const DelimSettings& settings)
+{
+    load(file, settings);
+}
 
-      offset = end + 1;
+void Word_generator::load(const File& file, const DelimSettings& settings)
+{
+    const char* text = file.get();
+    const auto text_size = file.size();
+    m_strlist.reserve(text_size/4); // might use extra space, but we can afford it
+
+    u64 end, offset = 0;
+    while (offset < text_size) {
+        bool valid = lnUTF8FindWord(text, &settings, &offset, &end);
+        assert(valid && "failed to parse word");
+        std::string str{text+offset, static_cast<size_t>((end+1) - offset)};
+        if (settings.only_lowercase) {
+            lnUTF8ToLower(&str[0], static_cast<int>(str.size()));
+        }
+        m_strlist.push_back(std::move(str));
+
+        offset = end + 1;
     }
 
     std::uniform_int_distribution<long>::param_type param{
-      0, static_cast<long>(m_strlist.size() - 1) };
+        0, static_cast<long>(m_strlist.size() - 1) };
     m_dist.param(param);
-  }
+}
 
-  std::string Word_generator::next()
-  {
-	  return m_strlist[m_dist(m_re)];
-  }
+std::string Word_generator::next()
+{
+    return m_strlist[m_dist(m_re)];
+}
 }

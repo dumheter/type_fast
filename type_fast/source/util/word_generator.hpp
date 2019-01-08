@@ -41,21 +41,37 @@
 
 namespace tf
 {
-  class Word_generator
-  {
-  public:
+class Word_generator
+{
+public:
+    /**
+     * Recommended way of constructing a word generator, will call load.
+     */
     Word_generator(const File& file, const DelimSettings& settings);
+
+    /**
+     * Call setup before using the class when using this constructor.
+     */
+    Word_generator() = default;
+
+    /**
+     * Manually load the words from a file.
+     */
+    void load(const File& file, const DelimSettings& settings);
+
+    Word_generator(const Word_generator& other) = delete;
+    Word_generator& operator=(const Word_generator& other) = delete;
 
     std::string next();
 
     size_t word_count() const { return m_strlist.size(); }
 
-  private:
+private:
     std::vector<std::string> m_strlist;
     std::random_device m_rd{};
-    std::default_random_engine m_re;
+    std::default_random_engine m_re{m_rd()};
     std::uniform_int_distribution<long> m_dist;
-  };
+};
 }
 
 #endif//__WORD_GENERATOR_HPP__
