@@ -70,24 +70,21 @@ void Game::setup_start_objects()
         );
 
     // Reset button
-    //auto reset_fn = [](decltype(hscroll_words)& map) { map.clear(); };
     tf::Rect reset_btn_rect{{10, 680, 100, 30}, tf::col_darkerblue,
                             tf::col_darkblue, 4};
     buttons.push_back(
         tf::create_button(
             reset_btn_rect, "reset", tf::col_lighterblue,
             [](){
-                printf("cannot reset :(\n");
+                Game::instance().hscroll_words.clear();
             })
         );
 
     // wpm
-    {
-        Rectangle wpm_slider_pos{10, (float)m_height - 100, 150, 50};
-        auto wpm_slider = tf::create_slider(wpm_slider_pos, "wpm %d", tf::col_orange, 30,
-                                            1, 170, true);
-        sliders.push_back(std::move(wpm_slider));
-    }
+    Rectangle wpm_slider_pos{10, (float)m_height - 100, 150, 50};
+    auto wpm_slider = tf::create_slider(
+        wpm_slider_pos, "wpm %d", tf::col_orange, 30, 1, 170, true);
+    sliders.push_back(std::move(wpm_slider));
     m_wpm_view = &sliders.back().value;
     double wmp_timer = GetTime();
 
@@ -100,7 +97,7 @@ void Game::setup_start_objects()
         ({{"", tf::col_white, 20, {120, 0}},
           [](tf::Word_formatter* wf) {
               sprintf_s(wf->handle.text, wf->handle.text_size,
-                        "Frametime %.2f ms", GetFrameTime());
+                        "Frametime %.2f ms", GetFrameTime() * 1000.0f);
           }
         });
 
@@ -203,7 +200,7 @@ void Game::spawn_word()
         (float)speed_dist(m_re), 0, true,
         [](tf::H_scroll<tf::Text_highlightable<tf::Word>>* hscroll) {
             hscroll->active = false;
-         }
+        }
     };
     tf::H_scroll_set_width(&m_font, obj);
     hscroll_words.insert({std::move(str), std::move(obj)});
@@ -213,40 +210,40 @@ void Game::spawn_word()
 void Game::draw()
 {
     BeginDrawing();
-    {
-        // ============================================================ //
-        // Draw
-        // ============================================================ //
-        ClearBackground(tf::col_cornflower_blue);
-        DrawFPS(5, 5);
 
-        for (const auto& word : words) {
-            tf::draw(&m_font, word);
-        }
-        for (const auto& text : texts) {
-            tf::draw(&m_font, text);
-        }
-        for (const auto& formatter : word_formatters) {
-            tf::draw(&m_font, formatter);
-        }
-        for (const auto& map : hscroll_words) {
-            tf::draw(&m_font, map.second);
-        }
-        for (const auto& rect : rects) {
-            tf::draw(&m_font, rect);
-        }
-        for (const auto& button : buttons) {
-            tf::draw(&m_font, button);
-        }
-        for (const auto& slider : sliders) {
-            tf::draw(&m_font, slider);
-        }
-        for (const auto& hscroll_rect : hscroll_rects) {
-            tf::draw(&m_font, hscroll_rect);
-        }
-        tf::draw(&m_font, m_input_box);
-        // DrawTextureV(gnome, {100,100}, RAYWHITE);
+    // ============================================================ //
+    // Draw
+    // ============================================================ //
+    ClearBackground(tf::col_cornflower_blue);
+    DrawFPS(5, 5);
+
+    for (const auto& word : words) {
+        tf::draw(&m_font, word);
     }
+    for (const auto& text : texts) {
+        tf::draw(&m_font, text);
+    }
+    for (const auto& formatter : word_formatters) {
+        tf::draw(&m_font, formatter);
+    }
+    for (const auto& map : hscroll_words) {
+        tf::draw(&m_font, map.second);
+    }
+    for (const auto& rect : rects) {
+        tf::draw(&m_font, rect);
+    }
+    for (const auto& button : buttons) {
+        tf::draw(&m_font, button);
+    }
+    for (const auto& slider : sliders) {
+        tf::draw(&m_font, slider);
+    }
+    for (const auto& hscroll_rect : hscroll_rects) {
+        tf::draw(&m_font, hscroll_rect);
+    }
+    tf::draw(&m_font, m_input_box);
+    // DrawTextureV(gnome, {100,100}, RAYWHITE);
+
     EndDrawing();
 }
 
