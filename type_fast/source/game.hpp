@@ -44,10 +44,13 @@
 #include "util/dict.hpp"
 #include "util/view.hpp"
 #include "util/word_generator.hpp"
+#include "util/raylib_lifetime.hpp"
 #include "widget/widget.hpp"
 #include "widget/inputbox.hpp"
 #include "thirdparty/filip/unicode.h"
 #include "thirdparty/dutil/stopwatch.hpp"
+#include "audio/tfmusic.hpp"
+#include "audio/tfsound.hpp"
 
 // ============================================================ //
 // Class
@@ -56,16 +59,16 @@
 namespace tf
 {
 
-enum class Event
-{
-    // Press enter in inputbox.
-    text_input,
-    // When a word scrolls off the screen.
-    word_death
-};
-
 class Game
 {
+    // ============================================================ //
+    // OpenGL context lifetime
+    // ============================================================ //
+    // must be first
+    Raylib_lifetime raylib_lifetime{};
+
+private:
+
     // ============================================================ //
     // Singleton
     // ============================================================ //
@@ -78,13 +81,7 @@ public:
     Game(const Game& other) = delete;
     Game& operator=(const Game& other) = delete;
 
-    // ============================================================ //
-    // Must be called
-    // ============================================================ //
-    /**
-     * Call before closing the program.
-     */
-    void cleanup();
+    ~Game();
 
     /**
      * Main loop.
@@ -107,6 +104,8 @@ public:
     // ============================================================ //
     void update();
 
+    void update_audio();
+
     void spawn_word();
 
     // ============================================================ //
@@ -118,6 +117,8 @@ public:
     // Modifiers
     // ============================================================ //
     void load_word_generator(const char* wordfile);
+
+    void reset_game();
 
     // ============================================================ //
     // Lookup
@@ -134,29 +135,32 @@ public:
     // Private
     // ============================================================ //
 private:
-    int m_width;
-    int m_height;
+    int m_width = 0;
+    int m_height = 0;
     Font m_font;
     Word_generator m_wordgen{};
     std::random_device m_rd{};
     std::default_random_engine m_re{m_rd()};
-    double m_wpm_timer;
-    const int* m_wpm_view;
+    double m_wpm_timer = 0;
+    int m_wpm = 0;
+    dutil::Stopwatch updatetime{};
+    double updatetime_last = 0;
 
     // ============================================================ //
     // Game Objects
     // ============================================================ //
-    tf::Input_box<tf::Text_input<tf::Word>> m_input_box;
-
-    std::vector<tf::Word> words;
-    std::vector<tf::Text> texts;
-    std::vector<tf::Word_formatter> word_formatters;
-    using H_scroll_hl_word = tf::H_scroll<tf::Text_highlightable<tf::Word>>;
+    Input_box<Text_input<Word>> m_input_box;
+    std::vector<Word> words;
+    std::vector<Text> texts;
+    std::vector<Word_formatter> word_formatters;
+    using H_scroll_hl_word = H_scroll<Text_highlightable<Word>>;
     std::unordered_map<std::string, H_scroll_hl_word> hscroll_words;
-    std::vector<tf::Rect> rects;
-    std::vector<tf::Button<tf::Word>> buttons;
-    std::vector<tf::Slider> sliders;
-    std::vector<tf::H_scroll<tf::Rect>> hscroll_rects;
+    std::vector<Rect> rects;
+    std::vector<Button<Word>> buttons;
+    std::vector<Slider> sliders;
+    std::vector<H_scroll<Rect>> hscroll_rects;
+    Tfmusic music{};
+    std::vector<Tfsound> sounds;
 };
 
 }

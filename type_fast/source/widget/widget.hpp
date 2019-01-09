@@ -160,6 +160,7 @@ struct Slider {
     Rectangle marker;
     bool active;
     bool held;
+    void (*on_change)(Slider&);
 };
 
 // ============================================================ //
@@ -180,8 +181,8 @@ Checkbox create_checkbox(Vector2 pos, int size, const char* word, Color word_col
  * correctly.
  */
 Slider create_slider(Rectangle rect, const char* format, Color color,
-                     int default_val, int min_value = 0, int max_value = 100,
-                     bool active = true);
+                     void (*on_change)(Slider&), int default_val, int min_value = 0,
+                     int max_value = 100, bool active = true);
 
 // ============================================================ //
 

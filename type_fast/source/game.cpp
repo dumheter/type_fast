@@ -29,17 +29,19 @@
 namespace tf
 {
 
-void Game::cleanup()
+Game::~Game()
 {
     // UnloadTexture(gnome);
     UnloadFont(m_font);
-    CloseWindow();
 }
 
 void Game::run()
 {
     while (!WindowShouldClose()) {
+        updatetime.start();
         update();
+        updatetime.stop();
+        updatetime_last = updatetime.fms();
         draw();
     }
 }
@@ -49,7 +51,8 @@ void Game::setup(int width, int height, const char* title, int target_fps,
 {
     m_width = width;
     m_height = height;
-    InitWindow(width, height, title);
+    SetWindowSize(width, height);
+    SetWindowTitle(title);
     SetTargetFPS(target_fps);
     m_font = LoadFontEx(font, 96, 224, NULL);
     SetTextureFilter(m_font.texture, FILTER_BILINEAR);
@@ -70,44 +73,71 @@ void Game::setup_start_objects()
         );
 
     // Reset button
-    tf::Rect reset_btn_rect{{10, 680, 100, 30}, tf::col_darkerblue,
-                            tf::col_darkblue, 4};
+    constexpr float reset_btn_width = 100;
+    tf::Rect reset_btn_rect{{m_width/2 - reset_btn_width/2, 680, reset_btn_width, 30},
+                            tf::col_darkerblue,tf::col_darkblue, 4};
     buttons.push_back(
         tf::create_button(
             reset_btn_rect, "reset", tf::col_lighterblue,
             [](){
-                Game::instance().hscroll_words.clear();
+                Game::instance().reset_game();
             })
         );
 
     // wpm
     Rectangle wpm_slider_pos{10, (float)m_height - 100, 150, 50};
-    auto wpm_slider = tf::create_slider(
-        wpm_slider_pos, "wpm %d", tf::col_orange, 30, 1, 170, true);
-    sliders.push_back(std::move(wpm_slider));
-    m_wpm_view = &sliders.back().value;
-    double wmp_timer = GetTime();
+    constexpr int wpm_default = 40;
+    sliders.push_back(
+        tf::create_slider(
+            wpm_slider_pos, "wpm %d", tf::col_orange,
+            [](Slider& slider){
+                Game& game = Game::instance();
+                game.m_wpm = slider.value;
+            },
+            wpm_default, 1, 170, true)
+        );
 
     // Title
     const float tfwidth = MeasureTextEx(m_font, "Type Fast", 50, 0).x;
     words.push_back({ "Type Fast", tf::col_red, 50, {m_width/2 - tfwidth/2, -5} });
 
     // Frametime
+    constexpr float fps_x = 120;
     word_formatters.push_back
-        ({{"", tf::col_white, 20, {120, 0}},
+        ({{"", tf::col_white, 20, {fps_x, 0}},
           [](tf::Word_formatter* wf) {
               sprintf_s(wf->handle.text, wf->handle.text_size,
-                        "Frametime %.2f ms", GetFrameTime() * 1000.0f);
+                        "Frametime %.2fms, Update %.2fms", GetFrameTime()*1000,
+                        Game::instance().updatetime_last);
           }
         });
+    const float fps_width = MeasureTextEx(
+        m_font, "Frametime 12.73ms, Update 0.13ms", 20, 0
+        ).x;
 
     // Mouse pos
     word_formatters.push_back
-        ({{"", tf::col_white, 20, {250, 0}},
+        ({{"", tf::col_white, 20, {fps_x + fps_width, 0}},
           [](tf::Word_formatter* wf) {
               sprintf_s(wf->handle.text, wf->handle.text_size,
                         "mouse %d:%d", GetMouseX(), GetMouseY());}
         });
+
+    // Music
+    music = Tfmusic{"res/audio/joy_of_painting.ogg"};
+    music.play();
+
+    // Volume slider
+    Rectangle volume_slider_pos{10, (float)m_height-50, 150, 50};
+    sliders.push_back(
+        create_slider(
+            volume_slider_pos, "Volume %d", tf::col_orange,
+            [](Slider& slider) {
+                Game& game = Game::instance();
+                game.music.set_volume(slider.value / 100.0f);
+            },
+            60, 0, 100, true)
+        );
 
     // ============================================================ //
     // Dummy objects
@@ -121,12 +151,14 @@ void Game::setup_start_objects()
 
 void Game::update()
 {
+    update_audio();
+
     if (IsKeyPressed(KEY_F11)) {
         ToggleFullscreen();
     }
 
     // Spawn new word
-    if (GetTime() - m_wpm_timer > 60.0 / *m_wpm_view) {
+    if (GetTime() - m_wpm_timer > 60.0 / m_wpm) {
         m_wpm_timer = GetTime();
         spawn_word();
     }
@@ -179,6 +211,11 @@ void Game::update()
     for (auto& slider : sliders) {
         tf::update(slider, cpos, is_left_down);
     }
+}
+
+void Game::update_audio()
+{
+    music.update();
 }
 
 void Game::spawn_word()
@@ -266,7 +303,11 @@ void Game::load_word_generator(const char* wordfile)
     sw.stop();
     printf("init wordgen: %.2f ms\n", sw.fnow_ms());
     printf("Words loaded: %llu.\n", m_wordgen.word_count());
+}
 
+void Game::reset_game()
+{
+    hscroll_words.clear();
 }
 
 }

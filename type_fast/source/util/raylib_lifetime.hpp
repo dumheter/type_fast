@@ -22,29 +22,39 @@
  * SOFTWARE.
  */
 
+#ifndef __RAYLIB_LIFETIME_HPP__
+#define __RAYLIB_LIFETIME_HPP__
+
 // ============================================================ //
 // Headers
 // ============================================================ //
 
-#include "game.hpp"
-#include "util/win.hpp"
+#include <raylib.h>
 
 // ============================================================ //
-// Main
+// Class
 // ============================================================ //
 
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    constexpr int width = 1280;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+class Raylib_lifetime
+{
+public:
+    Raylib_lifetime()
+	{
+            InitWindow(1280, 720, "Type Fast");
+            InitAudioDevice();
+        }
 
-    return 0;
+    ~Raylib_lifetime()
+        {
+            CloseWindow();
+
+            CloseAudioDevice();
+        }
+};
+
 }
+
+#endif//__RAYLIB_LIFETIME_HPP__

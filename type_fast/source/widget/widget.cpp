@@ -85,13 +85,14 @@ static inline void slider_update_value(Slider& slider)
 {
     const float delta = ((slider.line.b.x - slider.line.a.x) /
                          (float)(slider.max_value - slider.min_value));
-    slider.value = 1 + lroundf(
+    slider.value = lroundf(
         (slider.lmarker.a.x - slider.marker.x  - marker_width/2) / (-delta)
         );
 }
 
 Slider create_slider(Rectangle rect, const char* format, Color color,
-                     int default_val, int min_value, int max_value, bool active)
+                     void (*on_change)(Slider&), int default_val, int min_value,
+                     int max_value, bool active)
 {
     // NOTE more constants at slider_update_markerx()
     const float size = rect.height / 2;
@@ -111,7 +112,7 @@ Slider create_slider(Rectangle rect, const char* format, Color color,
 
     Slider slider{
         std::move(word), "", default_val, min_value, max_value, color, lmarker,
-        rmarker, line, marker, active, false
+        rmarker, line, marker, active, false, on_change
     };
     slider_update_markerx(slider);
 
@@ -122,6 +123,8 @@ Slider create_slider(Rectangle rect, const char* format, Color color,
     const int sprintf_res = sprintf_s(slider.title.text, slider.title.text_size,
                                       slider.template_title, default_val);
     assert(sprintf_res != 0 && "sprintf error");
+
+    slider.on_change(slider);
 
     return slider;
 }
@@ -242,8 +245,10 @@ void update(Slider& slider, Vector2 mouse_pos, bool left_mouse_down)
 {
     if (left_mouse_down && !slider.held && slider.active) {
 
-        if (inside(mouse_pos.x, slider.marker.x,slider.marker.x+slider.marker.width) &&
-            inside(mouse_pos.y, slider.marker.y,slider.marker.y+slider.marker.height)) {
+        if (inside(mouse_pos.x, slider.marker.x,
+                   slider.marker.x+slider.marker.width) &&
+            inside(mouse_pos.y, slider.marker.y,
+                   slider.marker.y+slider.marker.height)) {
             slider.held = true;
         }
     }
@@ -256,8 +261,10 @@ void update(Slider& slider, Vector2 mouse_pos, bool left_mouse_down)
             const int oldvalue = slider.value;
             slider_update_value(slider);
             if (oldvalue != slider.value) {
-                const int sprintf_res = sprintf_s(slider.title.text, slider.title.text_size,
-                                                  slider.template_title, slider.value);
+                const int sprintf_res = sprintf_s(
+                    slider.title.text, slider.title.text_size,
+                    slider.template_title, slider.value);
+                slider.on_change(slider);
                 assert(sprintf_res != 0 && "sprintf error");
             }
         }

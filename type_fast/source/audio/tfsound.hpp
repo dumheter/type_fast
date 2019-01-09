@@ -22,29 +22,66 @@
  * SOFTWARE.
  */
 
+#ifndef __TFSOUND_HPP__
+#define __TFSOUND_HPP__
+
 // ============================================================ //
 // Headers
 // ============================================================ //
 
-#include "game.hpp"
-#include "util/win.hpp"
+#include <raylib.h>
+#include <string>
 
 // ============================================================ //
-// Main
+// Class
 // ============================================================ //
 
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    constexpr int width = 1280;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+class Tfsound
+{
+public:
 
-    return 0;
+    // ============================================================ //
+    // Lifetime
+    // ============================================================ //
+
+    explicit Tfsound(const char* sound_path);
+
+    Tfsound(const Tfsound& other) = delete;
+    Tfsound& operator=(const Tfsound& other) = delete;
+
+    ~Tfsound();
+
+public:
+
+    // ============================================================ //
+    // Actions
+    // ============================================================ //
+
+    void play() const;
+
+    void pause() const;
+
+    void resume() const;
+
+    void stop() const;
+
+    // ============================================================ //
+    // Info
+    // ============================================================ //
+
+    bool is_playing() const;
+
+    std::string& get_name() { return m_name; }
+
+
+private:
+    Sound m_sound;
+    std::string m_name;
+};
+
 }
+
+#endif//__TFSOUND_HPP__

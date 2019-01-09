@@ -22,29 +22,53 @@
  * SOFTWARE.
  */
 
-// ============================================================ //
-// Headers
-// ============================================================ //
+#include "tfsound.hpp"
 
-#include "game.hpp"
-#include "util/win.hpp"
+#include <string.h>
 
-// ============================================================ //
-// Main
-// ============================================================ //
-
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    constexpr int width = 1280;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+Tfsound::Tfsound(const char* sound_path)
+{
+    m_sound = LoadSound(sound_path);
 
-    return 0;
+    const long pathlen = static_cast<int>(strlen(sound_path));
+    long offset = pathlen;
+    while (offset --> 0) {
+        if (sound_path[offset] == '/') break;
+    }
+    m_name = std::string{sound_path+offset+1, static_cast<unsigned long>(pathlen)};
+}
+
+Tfsound::~Tfsound()
+{
+    UnloadSound(m_sound);
+}
+
+void Tfsound::play() const
+{
+    PlaySound(m_sound);
+}
+
+void Tfsound::pause() const
+{
+    PauseSound(m_sound);
+}
+
+void Tfsound::resume() const
+{
+    ResumeSound(m_sound);
+}
+
+void Tfsound::stop() const
+{
+    StopSound(m_sound);
+}
+
+bool Tfsound::is_playing() const
+{
+    return IsSoundPlaying(m_sound);
+}
+
 }
