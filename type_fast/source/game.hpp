@@ -30,27 +30,19 @@
 // ============================================================ //
 
 #include <raylib.h>
-#include <cmath>
-#include <stdio.h>
-#include <iostream>
 #include <vector>
-#include <cstdio>
-#include <cassert>
 #include <random>
-#include <functional>
+#include "audio/tfmusic.hpp"
+#include "audio/tfsound.hpp"
+#include "thirdparty/filip/unicode.h"
+#include "thirdparty/dutil/stopwatch.hpp"
 #include "util/color.hpp"
 #include "util/util.hpp"
 #include "util/file.hpp"
-#include "util/dict.hpp"
-#include "util/view.hpp"
 #include "util/word_generator.hpp"
 #include "util/raylib_lifetime.hpp"
 #include "widget/widget.hpp"
 #include "widget/inputbox.hpp"
-#include "thirdparty/filip/unicode.h"
-#include "thirdparty/dutil/stopwatch.hpp"
-#include "audio/tfmusic.hpp"
-#include "audio/tfsound.hpp"
 
 // ============================================================ //
 // Class

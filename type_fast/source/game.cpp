@@ -24,6 +24,7 @@
 
 #include "game.hpp"
 
+#include <cassert>
 #include "thirdparty/dutil/stopwatch.hpp"
 
 namespace tf
