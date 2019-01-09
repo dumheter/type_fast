@@ -30,7 +30,8 @@
 // ============================================================ //
 
 #include <raylib.h>
-#include <unordered_map>
+#include "constants.hpp"
+#include "../event.hpp"
 
 // ============================================================ //
 // Struct
@@ -41,7 +42,7 @@ namespace tf
 
 struct Word
 {
-    static constexpr int text_size = 40;
+    static constexpr int text_size = constants::word_size;
     char text[text_size];
     Color color;
     float font_size;
@@ -50,7 +51,7 @@ struct Word
 
 struct Text
 {
-    static constexpr int text_size = 256;
+    static constexpr int text_size = constants::text_size;
     char text[text_size];
     Color color;
     float font_size;
@@ -186,12 +187,12 @@ Slider create_slider(Rectangle rect, const char* format, Color color,
 
 // ============================================================ //
 
-using H_scroll_hl_word = tf::H_scroll<tf::Text_highlightable<tf::Word>>;
-using map_H_scroll = std::unordered_map<std::string, H_scroll_hl_word>;
+// using H_scroll_hl_word = H_scroll<Text_highlightable<Word>>;
+// using map_H_scroll = std::unordered_map<std::string, H_scroll_hl_word>;
 
 void update(Word_formatter& word_formatter);
 void update(Button<Word>& button, Vector2 mouse_pos, bool left_mouse_pressed);
-void update(Input_box<Text_input<Word>>& input_box, int last_key, map_H_scroll& map);
+void update(Input_box<Text_input<Word>>& input_box, int last_key, Event_word_input** event_word_input);
 void update(Text_highlightable<Word>& word_hl_scoll);
 
 /**

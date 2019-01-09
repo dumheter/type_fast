@@ -1,0 +1,57 @@
+/**
+ * MIT License
+ *
+ * Copyright (c) 2018 Christoffer Gustafsson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "event.hpp"
+
+#include <string.h>
+#include <cassert>
+
+namespace tf
+{
+
+Event_word_input* create_event_word_input(const char* word)
+{
+    Event_word_input* event = new Event_word_input;
+    const auto res = strcpy_s(event->word, event->size, word);
+    assert(res == 0 && "copy word to event");
+    return event;
+}
+
+Event_word_missed* create_event_word_missed(const char* word)
+{
+    Event_word_missed* event = new Event_word_missed;
+    const auto res = strcpy_s(event->word, event->size, word);
+    assert(res == 0 && "copy word to event");
+    return event;
+}
+
+Event_word_hit* create_event_word_hit(const char* word)
+{
+    Event_word_hit* event = new Event_word_hit;
+    const auto res = strcpy_s(event->word, event->size, word);
+    assert(res == 0 && "copy word to event");
+    return event;
+}
+
+}

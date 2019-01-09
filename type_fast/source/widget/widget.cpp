@@ -156,8 +156,11 @@ void update(Button<Word>& button, Vector2 mouse_pos, bool left_mouse_pressed)
     }
 }
 
-void update(Input_box<Text_input<Word>>& input_box, int last_key, map_H_scroll& map)
+void update(Input_box<Text_input<Word>>& input_box, int last_key,
+            Event_word_input** event_word_input)
 {
+    *event_word_input = nullptr;
+
     if (input_box.text_input.active) {
         // alpah keypress
         if (last_key >= 33 && last_key <= 255 &&
@@ -178,15 +181,8 @@ void update(Input_box<Text_input<Word>>& input_box, int last_key, map_H_scroll& 
         // space or enter
         else if ((IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))
                  && input_box.text_input.text_pos > 0) {
+            *event_word_input = create_event_word_input(input_box.text_input.text.text);
             const auto len = strlen(input_box.text_input.text.text);
-            const std::string typed{input_box.text_input.text.text,
-                                    len};
-            auto it = map.find(typed);
-            if (it != map.end()) {
-
-                // entered correct word
-                map.erase(it);
-            }
             memset(input_box.text_input.text.text, 0, len);
             input_box.text_input.text_pos = 0;
         }

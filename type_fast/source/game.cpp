@@ -168,31 +168,20 @@ void Game::update()
     const bool is_left_down = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     const Vector2 cpos = GetMousePosition();
     const int last_key = GetKeyPressed();
-    const auto on_word_missed =
-        []() {
-            Game& game = Game::instance();
-            constexpr float speed = 5.0f;
-            constexpr float size = 50;
-            tf::Rect rect{{game.width() - size, 0, size, (float)game.height()},
-                          tf::col_white, {0xFF,0,0,100}, 0};
-            bool found = false;
-            for (auto& hscroll_rect : game.hscroll_rects) {
-                if (!hscroll_rect.active) {
-                    found = true;
-                    hscroll_rect.active = true;
-                    hscroll_rect.drawable = rect;
-                }
-            }
-            if (!found) {
-                game.hscroll_rects.push_back({
-                        std::move(rect), speed, size, true,
-                        [](tf::H_scroll<tf::Rect>* hscroll){
-                            hscroll->active = false;}}
-                    );
-            }
-        };
 
-    tf::update(m_input_box, last_key, hscroll_words);
+    Event_word_input* ibox_event;
+    tf::update(m_input_box, last_key, &ibox_event);
+    if (ibox_event) {
+        const auto len = strlen(ibox_event->word);
+        //TODO ugly string allocation
+        std::string typed{ibox_event->word, len};
+        auto it = hscroll_words.find(typed);
+        if (it != hscroll_words.end()) { // entered correct word
+            events.emplace_back(Event_type::word_input, ibox_event);
+            hscroll_words.erase(it);
+        }
+    }
+
     for (auto& formatter : word_formatters) {
         tf::update(formatter);
     }
@@ -201,8 +190,11 @@ void Game::update()
     }
     for (auto it = hscroll_words.begin(); it != hscroll_words.end();) {
         if (tf::update(it->second, (float)m_width)) {
+            events.emplace_back(
+                Event_type::word_missed,
+                create_event_word_missed(it->second.drawable.handle.text)
+                );
             it = hscroll_words.erase(it);
-            on_word_missed();
         }
         else it++;
     }
@@ -212,11 +204,63 @@ void Game::update()
     for (auto& slider : sliders) {
         tf::update(slider, cpos, is_left_down);
     }
+
+    handle_events();
 }
 
 void Game::update_audio()
 {
     music.update();
+}
+
+void Game::handle_events()
+{
+    for (const auto& event : events) {
+        switch (event.type) {
+        case Event_type::word_input: {
+            on_word_input(event);
+            break;
+        }
+        case Event_type::word_missed: {
+            on_word_missed(event);
+            break;
+        }
+        case Event_type::word_hit: {
+            printf("word hit event not handled\n");
+            break;
+        }
+        }
+    }
+
+    events.clear();
+}
+
+void Game::on_word_input(const Event& event)
+{
+
+}
+
+void Game::on_word_missed(const Event& event)
+{
+    constexpr float speed = 5;
+    constexpr float size = 50;
+    tf::Rect rect{{m_width - size, 0, size, (float)m_height},
+                  tf::col_white, {0xFF,0,0,100}, 0};
+    bool found = false;
+    for (auto& hscroll_rect : hscroll_rects) {
+        if (!hscroll_rect.active) {
+            found = true;
+            hscroll_rect.active = true;
+            hscroll_rect.drawable = rect;
+        }
+    }
+    if (!found) {
+        hscroll_rects.push_back({
+                std::move(rect), speed, size, true,
+                [](tf::H_scroll<tf::Rect>* hscroll){
+                    hscroll->active = false;}}
+            );
+    }
 }
 
 void Game::spawn_word()

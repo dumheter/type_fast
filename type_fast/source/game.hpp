@@ -32,6 +32,8 @@
 #include <raylib.h>
 #include <vector>
 #include <random>
+#include <unordered_map>
+#include "event.hpp"
 #include "audio/tfmusic.hpp"
 #include "audio/tfsound.hpp"
 #include "thirdparty/filip/unicode.h"
@@ -98,6 +100,15 @@ public:
 
     void update_audio();
 
+    /**
+     * Unhandled events will be destroyed.
+     */
+    void handle_events();
+
+    void on_word_input(const Event& event);
+
+    void on_word_missed(const Event& event);
+
     void spawn_word();
 
     // ============================================================ //
@@ -153,6 +164,7 @@ private:
     std::vector<H_scroll<Rect>> hscroll_rects;
     Tfmusic music{};
     std::vector<Tfsound> sounds;
+    std::vector<Event> events;
 };
 
 }
