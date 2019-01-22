@@ -184,6 +184,8 @@ void Game::update_game_objects()
         spawn_word();
     }
 
+    m_wpm_stats.update();
+
     const bool is_left_pressed = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     const bool is_left_down = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     const Vector2 cpos = GetMousePosition();
@@ -248,7 +250,7 @@ void Game::on_word_input(const Event& event)
     auto it = hscroll_words.find(typed);
     if (it != hscroll_words.end()) { // entered correct word
         hscroll_words.erase(it);
-        m_wpm_stats.update(len);
+        m_wpm_stats.word_input(len);
     }
 }
 
@@ -365,6 +367,7 @@ void Game::load_word_generator(const char* wordfile)
 void Game::reset_game()
 {
     hscroll_words.clear();
+    m_wpm_stats.reset();
 }
 
 }

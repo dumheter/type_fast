@@ -23,15 +23,20 @@
  */
 
 #include "wpm.hpp"
+#include <cmath>
 
 namespace tf
 {
 
-void Wpm::update(const size_t word_size)
+
+void Wpm::word_input(const size_t word_size)
 {
     m_word_count++;
     m_word_total_length += word_size;
+}
 
+void Wpm::update()
+{
     const std::chrono::time_point<std::chrono::high_resolution_clock> now =
         std::chrono::high_resolution_clock::now();
     m_active_time += std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -39,7 +44,15 @@ void Wpm::update(const size_t word_size)
     m_last_update = now;
 }
 
-static float _wpm(u64 active_time, u64 word_count)
+void Wpm::reset()
+{
+    m_word_count = 0;
+    m_word_total_length = 0;
+    m_active_time = std::chrono::milliseconds(0);
+    m_last_update = std::chrono::high_resolution_clock::now();
+}
+
+static inline float _wpm(u64 active_time, u64 word_count)
 {
     const float ms_per_word =
         static_cast<float>(active_time) / word_count;
@@ -55,7 +68,8 @@ float Wpm::get_wpm() const
 
 float Wpm::get_adjusted_wpm() const
 {
-    return _wpm(m_active_time.count(), m_word_total_length / m_word_adjusted_length);
+    return _wpm(m_active_time.count(),
+                std::llround(m_word_total_length / m_word_adjusted_length));
 }
 
 }

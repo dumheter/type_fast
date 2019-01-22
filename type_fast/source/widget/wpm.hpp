@@ -45,7 +45,17 @@ class Wpm
 public:
     Wpm() = default;
 
-    void update(const size_t word_size);
+    /**
+     * Call when a new word was entered and should be tracked.
+     */
+    void word_input(const size_t word_size);
+
+    /**
+     * Call contineously to update the internal clocks.
+     */
+    void update();
+
+    void reset();
 
     float get_wpm() const;
 
