@@ -125,7 +125,7 @@ struct Button {
 template <typename TText>
 struct Text_input {
     TText text;
-    int text_pos;
+    int text_pos; // where your cursor is
     Color col_marker;
     float max_width;
     bool active;

@@ -51,6 +51,12 @@ public:
     void word_input(const size_t word_size);
 
     /**
+     * Call when the first letter was entered. Used to detect when the player
+     * goes afk.
+     */
+    void first_letter_input();
+
+    /**
      * Call contineously to update the internal clocks.
      */
     void update();
@@ -66,14 +72,23 @@ public:
     float get_adjusted_wpm() const;
 
 private:
-    u64 m_word_count = 0;
-    u64 m_word_total_length = 0;
-    static constexpr float m_word_adjusted_length = 4.0f;
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_last_update{
+    u64 word_count = 0;
+    u64 word_total_length = 0;
+    static constexpr float word_adjusted_length = 4.0f;
+    std::chrono::time_point<std::chrono::high_resolution_clock> last_update{
         std::chrono::high_resolution_clock::now()
     };
-    std::chrono::milliseconds m_active_time{0};
-    //static constexpr std::chrono::milliseconds m_inactive_timeout{3000};
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time{
+        std::chrono::high_resolution_clock::now()
+    };
+
+    std::chrono::milliseconds active_time{0};
+    std::chrono::milliseconds inactive_time{0};
+
+    /**
+     * We only start the wpm counter once the player has entered a letter.
+     */
+    bool has_begun = false;
 };
 
 }

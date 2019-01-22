@@ -163,10 +163,15 @@ void update(Input_box<Text_input<Word>>& input_box, std::vector<Event>& events)
     if (input_box.text_input.active) {
         // alpah keypress
         if (last_key >= 33 && last_key <= 255 &&
-            input_box.text_input.text_pos + 2 < input_box.text_input.text.text_size) {
+            input_box.text_input.text_pos + 4 < input_box.text_input.text.text_size) {
             const int bytes = lnUTF8Encode(input_box.text_input.text.text +
                                            input_box.text_input.text_pos, last_key);
+            if (input_box.text_input.text_pos == 0) { // first letter
+                events.push_back(Event::create_first_letter_input(
+                                     input_box.text_input.text.text,bytes));
+            }
             input_box.text_input.text_pos += bytes;
+
         }
         // backspace
         else if (IsKeyPressed(KEY_BACKSPACE) && input_box.text_input.text_pos > 0) {
@@ -180,11 +185,7 @@ void update(Input_box<Text_input<Word>>& input_box, std::vector<Event>& events)
         // space or enter
         else if ((IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))
                  && input_box.text_input.text_pos > 0) {
-
-            Event_word_input* event_data = create_event_word_input(
-                input_box.text_input.text.text);
-            events.emplace_back(Event_type::word_input, event_data);
-
+            events.push_back(Event::create_word_input(input_box.text_input.text.text));
             input_box_clear(input_box);
         }
     }

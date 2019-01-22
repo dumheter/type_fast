@@ -30,6 +30,7 @@
 // ============================================================ //
 
 #include "widget/constants.hpp"
+#include "util/types.hpp"
 
 // ============================================================ //
 // Types
@@ -46,7 +47,9 @@ enum class Event_type
     // When a word scrolls off the screen.
     word_missed,
     // When you entered a word that exists.
-    word_hit
+    word_hit,
+    // When you type your first letter into the inputbox.
+    first_letter_input
 };
 
 // ============================================================ //
@@ -71,21 +74,53 @@ struct Event_word_hit
     char word[size];
 };
 
+struct Event_first_letter_input
+{
+    char8 letter[4]; // UTF-8 letter
+}; static_assert(sizeof(Event_first_letter_input) <= sizeof(void*),
+                 "Event_first_letter_input must fit in void*");
+
 // ============================================================ //
 // Event
 // ============================================================ //
 
-struct Event
+class Event
 {
-    Event_type type;
-    void* data;
+public:
+    // ============================================================ //
+    // Factory functions
+    // ============================================================ //
+    /**
+     * @param word Null terminated string
+     */
+    static Event create_word_input(const char* word);
+    static Event create_word_missed(const char* word);
+    static Event create_word_hit(const char* word);
+    /**
+     * Note, letters are encoded as UTF-8.
+     * @param letter Pointer to where the letter begins
+     * @param bytes How many bytes the letter is
+     */
+    static Event create_first_letter_input(const char* letter, const size_t bytes);
+
+    // ============================================================ //
+    // Getters
+    // ============================================================ //
+    const Event_word_input* get_word_input() const;
+    const Event_word_missed* get_word_missed() const;
+    const Event_word_hit* get_word_hit() const;
+    const Event_first_letter_input get_first_letter_input() const;
+
+    Event_type get_type() const { return this->type; };
 
     // ============================================================ //
     // Lifetime
     // ============================================================ //
+private:
     Event() : type(Event_type::none), data(nullptr) {}
     Event(Event_type type, void* data) : type(type), data(data) {}
 
+public:
     // no copy, because why
     Event(const Event& other) = delete;
     Event& operator=(const Event& other) = delete;
@@ -97,8 +132,8 @@ struct Event
     Event& operator=(Event&& other) noexcept
         {
             if (this != &other) {
-                type = other.type;
-                data = other.data;
+                this->type = other.type;
+                this->data = other.data;
                 other.data = nullptr;
             }
             return *this;
@@ -107,37 +142,33 @@ struct Event
     // RAII free our data
     ~Event()
         {
-            switch (type) {
+            switch (this->type) {
             case Event_type::word_input: {
-                delete (Event_word_input*)data;
+                delete (Event_word_input*)this->data;
                 break;
             }
             case Event_type::word_missed: {
-                delete (Event_word_missed*)data;
+                delete (Event_word_missed*)this->data;
                 break;
             }
             case Event_type::word_hit: {
-                delete (Event_word_hit*)data;
+                delete (Event_word_hit*)this->data;
                 break;
             }
+            case Event_type::first_letter_input:
             case Event_type::none: {
                 break;
             }
             }
         }
+
+    // ============================================================ //
+    // Variables
+    // ============================================================ //
+private:
+    Event_type type;
+    void* data;
 };
-
-// ============================================================ //
-// Helper functions
-// ============================================================ //
-
-/**
- * @param word Null terminated string
- */
-Event_word_input* create_event_word_input(const char* word);
-Event_word_missed* create_event_word_missed(const char* word);
-Event_word_hit* create_event_word_hit(const char* word);
-
 
 }
 

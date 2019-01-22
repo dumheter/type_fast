@@ -111,6 +111,8 @@ public:
 
     void on_word_missed(const Event& event);
 
+    void on_first_letter_input(const Event& event);
+
     void spawn_word();
 
     // ============================================================ //

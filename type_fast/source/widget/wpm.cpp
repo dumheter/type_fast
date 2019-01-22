@@ -31,25 +31,34 @@ namespace tf
 
 void Wpm::word_input(const size_t word_size)
 {
-    m_word_count++;
-    m_word_total_length += word_size;
+    this->last_update = std::chrono::high_resolution_clock::now();
+    this->word_count++;
+    this->word_total_length += word_size;
+}
+
+void Wpm::first_letter_input()
+{
+    if (!this->has_begun)
+        this->inactive_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - start_time);
+    this->has_begun = true;
 }
 
 void Wpm::update()
 {
-    const std::chrono::time_point<std::chrono::high_resolution_clock> now =
-        std::chrono::high_resolution_clock::now();
-    m_active_time += std::chrono::duration_cast<std::chrono::milliseconds>(
-        now - m_last_update);
-    m_last_update = now;
+    this->active_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - start_time - inactive_time);
 }
 
 void Wpm::reset()
 {
-    m_word_count = 0;
-    m_word_total_length = 0;
-    m_active_time = std::chrono::milliseconds(0);
-    m_last_update = std::chrono::high_resolution_clock::now();
+    this->word_count = 0;
+    this->word_total_length = 0;
+    this->last_update = std::chrono::high_resolution_clock::now();
+    this->start_time = std::chrono::high_resolution_clock::now();
+    this->active_time = std::chrono::milliseconds(0);
+    this->inactive_time = std::chrono::milliseconds(0);
+    this->has_begun = false;
 }
 
 static inline float _wpm(u64 active_time, u64 word_count)
@@ -63,13 +72,15 @@ static inline float _wpm(u64 active_time, u64 word_count)
 
 float Wpm::get_wpm() const
 {
-    return _wpm(m_active_time.count(), m_word_count);
+    return (this->word_count > 0 ?
+        _wpm(this->active_time.count(), this->word_count) : 0.0f);
 }
 
 float Wpm::get_adjusted_wpm() const
 {
-    return _wpm(m_active_time.count(),
-                std::llround(m_word_total_length / m_word_adjusted_length));
+    return (this->word_count > 0 ?
+            _wpm(this->active_time.count(), std::llround(
+                     this->word_total_length / this->word_adjusted_length)) : 0.0f);
 }
 
 }

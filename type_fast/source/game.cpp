@@ -154,7 +154,7 @@ void Game::setup_start_objects()
                 Game& game = Game::instance();
                 game.music.set_volume(slider.value / 100.0f);
             },
-            60, 0, 100, true)
+            0, 0, 100, true)
         );
 
     // ============================================================ //
@@ -199,10 +199,8 @@ void Game::update_game_objects()
     }
     for (auto it = hscroll_words.begin(); it != hscroll_words.end();) {
         if (tf::update(it->second, (float)m_width)) {
-            events.emplace_back(
-                Event_type::word_missed,
-                create_event_word_missed(it->second.drawable.handle.text)
-                );
+            events.push_back(
+                Event::create_word_missed(it->second.drawable.handle.text));
             it = hscroll_words.erase(it);
         }
         else it++;
@@ -223,7 +221,7 @@ void Game::update_audio()
 void Game::handle_events()
 {
     for (const auto& event : events) {
-        switch (event.type) {
+        switch (event.get_type()) {
         case Event_type::word_input: {
             on_word_input(event);
             break;
@@ -236,6 +234,10 @@ void Game::handle_events()
             printf("word hit event not handled\n");
             break;
         }
+        case Event_type::first_letter_input: {
+            on_first_letter_input(event);
+            break;
+        }
         }
     }
 
@@ -244,9 +246,8 @@ void Game::handle_events()
 
 void Game::on_word_input(const Event& event)
 {
-    const auto len = strlen(static_cast<Event_word_input*>(event.data)->word);
-    //TODO ugly string allocation
-    std::string typed{static_cast<Event_word_input*>(event.data)->word, len};
+    const auto len = strlen(event.get_word_input()->word);
+    std::string typed{event.get_word_input()->word, len};
     auto it = hscroll_words.find(typed);
     if (it != hscroll_words.end()) { // entered correct word
         hscroll_words.erase(it);
@@ -275,6 +276,11 @@ void Game::on_word_missed(const Event& event)
                     hscroll->active = false;}}
             );
     }
+}
+
+void Game::on_first_letter_input(const Event& event)
+{
+    m_wpm_stats.first_letter_input();
 }
 
 void Game::spawn_word()
