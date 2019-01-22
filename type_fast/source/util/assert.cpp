@@ -22,30 +22,16 @@
  * SOFTWARE.
  */
 
-// ============================================================ //
-// Headers
-// ============================================================ //
+#include "assert.h"
 
-#include "game.hpp"
-#include "util/win.hpp"
+#include <cassert>
 
-// ============================================================ //
-// Main
-// ============================================================ //
-
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    //constexpr int width = 1280;
-    constexpr int width = 1000;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+	void tf_assert(bool predicate, const char* msg)
+	{
+		assert(predicate && msg);
+	}
 
-    return 0;
 }

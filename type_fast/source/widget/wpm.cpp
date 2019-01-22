@@ -22,30 +22,40 @@
  * SOFTWARE.
  */
 
-// ============================================================ //
-// Headers
-// ============================================================ //
+#include "wpm.hpp"
 
-#include "game.hpp"
-#include "util/win.hpp"
-
-// ============================================================ //
-// Main
-// ============================================================ //
-
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    //constexpr int width = 1280;
-    constexpr int width = 1000;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+void Wpm::update(const size_t word_size)
+{
+    m_word_count++;
+    m_word_total_length += word_size;
 
-    return 0;
+    const std::chrono::time_point<std::chrono::high_resolution_clock> now =
+        std::chrono::high_resolution_clock::now();
+    m_active_time += std::chrono::duration_cast<std::chrono::milliseconds>(
+        now - m_last_update);
+    m_last_update = now;
+}
+
+static float _wpm(u64 active_time, u64 word_count)
+{
+    const float ms_per_word =
+        static_cast<float>(active_time) / word_count;
+    constexpr float ms_per_minute = 60 * 1000;
+
+    return ms_per_minute / ms_per_word;
+}
+
+float Wpm::get_wpm() const
+{
+    return _wpm(m_active_time.count(), m_word_count);
+}
+
+float Wpm::get_adjusted_wpm() const
+{
+    return _wpm(m_active_time.count(), m_word_total_length / m_word_adjusted_length);
+}
+
 }

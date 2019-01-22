@@ -30,6 +30,8 @@
 // ============================================================ //
 
 #include <raylib.h>
+#include <vector>
+#include <cstdint>
 #include "constants.hpp"
 #include "../event.hpp"
 
@@ -187,12 +189,12 @@ Slider create_slider(Rectangle rect, const char* format, Color color,
 
 // ============================================================ //
 
-// using H_scroll_hl_word = H_scroll<Text_highlightable<Word>>;
-// using map_H_scroll = std::unordered_map<std::string, H_scroll_hl_word>;
-
 void update(Word_formatter& word_formatter);
 void update(Button<Word>& button, Vector2 mouse_pos, bool left_mouse_pressed);
-void update(Input_box<Text_input<Word>>& input_box, int last_key, Event_word_input** event_word_input);
+/**
+ * @param events Where to put the events that might be generated.
+ */
+void update(Input_box<Text_input<Word>>& input_box, std::vector<Event>& events);
 void update(Text_highlightable<Word>& word_hl_scoll);
 
 /**
@@ -225,6 +227,8 @@ void draw(Font* font, const Slider& slider);
 // ============================================================ //
 
 void H_scroll_set_width(Font* font, H_scroll<Text_highlightable<Word>>& hs);
+
+void input_box_clear(Input_box<Text_input<Word>>& input_box);
 
 void widget_debug_print_sizes();
 

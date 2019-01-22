@@ -49,39 +49,9 @@ enum class Event_type
     word_hit
 };
 
-struct Event
-{
-    Event_type type;
-    void* data;
-
-    // ============================================================ //
-    // Lifetime
-    // ============================================================ //
-    Event() : type(Event_type::none), data(nullptr) {}
-    Event(Event_type type, void* data) : type(type), data(data) {}
-
-    // no copy because of destructor
-    Event(const Event& other) = delete;
-    Event& operator=(const Event& other) = delete;
-
-    // move - needed for std::vector
-    Event(Event&& other) noexcept : type(other.type), data(other.data)
-        {
-            other.data = nullptr;
-        };
-    Event& operator=(Event&& other) noexcept
-        {
-            if (this != &other) {
-                type = other.type;
-                data = other.data;
-                other.data = nullptr;
-            }
-            return *this;
-        }
-
-    // RAII free our data
-    ~Event() { delete data; }
-};
+// ============================================================ //
+// Event data
+// ============================================================ //
 
 struct Event_word_input
 {
@@ -102,13 +72,70 @@ struct Event_word_hit
 };
 
 // ============================================================ //
+// Event
+// ============================================================ //
+
+struct Event
+{
+    Event_type type;
+    void* data;
+
+    // ============================================================ //
+    // Lifetime
+    // ============================================================ //
+    Event() : type(Event_type::none), data(nullptr) {}
+    Event(Event_type type, void* data) : type(type), data(data) {}
+
+    // no copy, because why
+    Event(const Event& other) = delete;
+    Event& operator=(const Event& other) = delete;
+
+    Event(Event&& other) noexcept : type(other.type), data(other.data)
+        {
+            other.data = nullptr;
+        };
+    Event& operator=(Event&& other) noexcept
+        {
+            if (this != &other) {
+                type = other.type;
+                data = other.data;
+                other.data = nullptr;
+            }
+            return *this;
+        }
+
+    // RAII free our data
+    ~Event()
+        {
+            switch (type) {
+            case Event_type::word_input: {
+                delete (Event_word_input*)data;
+                break;
+            }
+            case Event_type::word_missed: {
+                delete (Event_word_missed*)data;
+                break;
+            }
+            case Event_type::word_hit: {
+                delete (Event_word_hit*)data;
+                break;
+            }
+            case Event_type::none: {
+                break;
+            }
+            }
+        }
+};
+
+// ============================================================ //
 // Helper functions
 // ============================================================ //
 
+/**
+ * @param word Null terminated string
+ */
 Event_word_input* create_event_word_input(const char* word);
-
 Event_word_missed* create_event_word_missed(const char* word);
-
 Event_word_hit* create_event_word_hit(const char* word);
 
 

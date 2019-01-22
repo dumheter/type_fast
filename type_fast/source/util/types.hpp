@@ -22,30 +22,27 @@
  * SOFTWARE.
  */
 
-// ============================================================ //
-// Headers
-// ============================================================ //
+#include <cstdint>
 
-#include "game.hpp"
-#include "util/win.hpp"
-
-// ============================================================ //
-// Main
-// ============================================================ //
-
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    //constexpr int width = 1280;
-    constexpr int width = 1000;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
+using s64 = int64_t;
 
-    return 0;
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+
+using f32 = float;
+static_assert(sizeof(float) == 4, "float is 4 bytes");
+using f64 = double;
+static_assert(sizeof(double) == 8, "double is 8 bytes");
+
+using char8 = char;
+static_assert(sizeof(char) == 1, "char is 1 byte");
+
 }

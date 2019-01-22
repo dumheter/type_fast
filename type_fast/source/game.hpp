@@ -43,6 +43,7 @@
 #include "util/file.hpp"
 #include "util/word_generator.hpp"
 #include "util/raylib_lifetime.hpp"
+#include "widget/wpm.hpp"
 #include "widget/widget.hpp"
 #include "widget/inputbox.hpp"
 
@@ -98,6 +99,8 @@ public:
     // ============================================================ //
     void update();
 
+    void update_game_objects();
+
     void update_audio();
 
     /**
@@ -129,6 +132,9 @@ public:
     int width() const { return instance().m_width; }
     int height() const { return instance().m_height; }
 
+    float get_wpm() const { return instance().m_wpm_stats.get_wpm(); }
+    float get_adjusted_wpm() const {return instance().m_wpm_stats.get_adjusted_wpm();}
+
     // ============================================================ //
     // Misc
     // ============================================================ //
@@ -144,10 +150,17 @@ private:
     Word_generator m_wordgen{};
     std::random_device m_rd{};
     std::default_random_engine m_re{m_rd()};
+
+    // how fast words will be created
     double m_wpm_timer = 0;
     int m_wpm = 0;
+
+    // track time spent in update
     dutil::Stopwatch updatetime{};
     double updatetime_last = 0;
+
+    // track the players wpm
+    Wpm m_wpm_stats{};
 
     // ============================================================ //
     // Game Objects
@@ -156,8 +169,7 @@ private:
     std::vector<Word> words;
     std::vector<Text> texts;
     std::vector<Word_formatter> word_formatters;
-    using H_scroll_hl_word = H_scroll<Text_highlightable<Word>>;
-    std::unordered_map<std::string, H_scroll_hl_word> hscroll_words;
+    std::unordered_map<std::string, H_scroll<Text_highlightable<Word>>> hscroll_words;
     std::vector<Rect> rects;
     std::vector<Button<Word>> buttons;
     std::vector<Slider> sliders;

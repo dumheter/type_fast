@@ -25,10 +25,10 @@
 #include "widget.hpp"
 #include "../util/util.hpp"
 #include "../util/color.hpp"
+#include "../util/assert.hpp"
 #include "../thirdparty/filip/unicode.h"
 #include <cstring>
 #include <cstdlib>
-#include <cassert>
 #include <string>
 
 namespace tf
@@ -118,11 +118,11 @@ Slider create_slider(Rectangle rect, const char* format, Color color,
 
     auto ret = strcpy_s(slider.template_title, Word::text_size, format);
     constexpr int STRCPY_S_SUCCESS = 0;
-    assert(ret == STRCPY_S_SUCCESS && "failed to strcpy");
+    tf_assert(ret == STRCPY_S_SUCCESS, "failed to strcpy");
 
     const int sprintf_res = sprintf_s(slider.title.text, slider.title.text_size,
                                       slider.template_title, default_val);
-    assert(sprintf_res != 0 && "sprintf error");
+    tf_assert(sprintf_res != 0, "sprintf error");
 
     slider.on_change(slider);
 
@@ -156,10 +156,9 @@ void update(Button<Word>& button, Vector2 mouse_pos, bool left_mouse_pressed)
     }
 }
 
-void update(Input_box<Text_input<Word>>& input_box, int last_key,
-            Event_word_input** event_word_input)
+void update(Input_box<Text_input<Word>>& input_box, std::vector<Event>& events)
 {
-    *event_word_input = nullptr;
+    const int last_key = GetKeyPressed();
 
     if (input_box.text_input.active) {
         // alpah keypress
@@ -181,10 +180,12 @@ void update(Input_box<Text_input<Word>>& input_box, int last_key,
         // space or enter
         else if ((IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))
                  && input_box.text_input.text_pos > 0) {
-            *event_word_input = create_event_word_input(input_box.text_input.text.text);
-            const auto len = strlen(input_box.text_input.text.text);
-            memset(input_box.text_input.text.text, 0, len);
-            input_box.text_input.text_pos = 0;
+
+            Event_word_input* event_data = create_event_word_input(
+                input_box.text_input.text.text);
+            events.emplace_back(Event_type::word_input, event_data);
+
+            input_box_clear(input_box);
         }
     }
 }
@@ -261,7 +262,7 @@ void update(Slider& slider, Vector2 mouse_pos, bool left_mouse_down)
                     slider.title.text, slider.title.text_size,
                     slider.template_title, slider.value);
                 slider.on_change(slider);
-                assert(sprintf_res != 0 && "sprintf error");
+                tf_assert(sprintf_res != 0, "sprintf error");
             }
         }
 
@@ -335,7 +336,7 @@ void draw(Font* font, const Text_input<Word>& text_input)
     float width = 0;
     if (text_input.text_pos > 0) {
         char* text = lnUTF8Substring(text_input.text.text, 0, text_input.text_pos);
-        assert(text && "Failed to create substring");
+        tf_assert(text, "Failed to create substring");
         DrawTextEx(*font, text, text_input.text.pos, text_input.text.font_size,
                    text_spacing, text_input.text.color);
         if (text_input.active) {
@@ -380,6 +381,13 @@ void H_scroll_set_width(Font* font, H_scroll<Text_highlightable<Word>>& hs)
         hs.drawable.handle.text,
         hs.drawable.handle.font_size, text_spacing);
     hs.width = len.x;
+}
+
+void input_box_clear(Input_box<Text_input<Word>>& input_box)
+{
+    const auto len = strlen(input_box.text_input.text.text);
+    memset(input_box.text_input.text.text, 0, len);
+    input_box.text_input.text_pos = 0;
 }
 
 void widget_debug_print_sizes()

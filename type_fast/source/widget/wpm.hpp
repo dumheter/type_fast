@@ -22,30 +22,50 @@
  * SOFTWARE.
  */
 
+#ifndef __WPM_HPP__
+#define __WPM_HPP__
+
 // ============================================================ //
 // Headers
 // ============================================================ //
 
-#include "game.hpp"
-#include "util/win.hpp"
+#include "widget.hpp"
+#include "util/types.hpp"
+#include <chrono>
 
 // ============================================================ //
-// Main
+// Class
 // ============================================================ //
 
-int main(int, char**)
+namespace tf
 {
-    tf::fix_console(); // make it use UTF8
 
-    //constexpr int width = 1280;
-    constexpr int width = 1000;
-    constexpr int height = 720;
-    constexpr int target_fps = 144;
-    const char* font = "res/fonts/open-sans/OpenSans-Regular.ttf";
-    const char* text_file = "res/dict/mobydick.txt";
-    tf::Game& game = tf::Game::instance();
-    game.setup(width, height, "Type Fast", target_fps, font, text_file);
-    game.run();
+class Wpm
+{
+public:
+    Wpm() = default;
 
-    return 0;
+    void update(const size_t word_size);
+
+    float get_wpm() const;
+
+    /**
+     * The adjusted length is supposed to normalize different words into a
+     * standard lenght.
+     */
+    float get_adjusted_wpm() const;
+
+private:
+    u64 m_word_count = 0;
+    u64 m_word_total_length = 0;
+    static constexpr float m_word_adjusted_length = 4.0f;
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_last_update{
+        std::chrono::high_resolution_clock::now()
+    };
+    std::chrono::milliseconds m_active_time{0};
+    //static constexpr std::chrono::milliseconds m_inactive_timeout{3000};
+};
+
 }
+
+#endif//__WPM_HPP__

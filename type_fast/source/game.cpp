@@ -85,7 +85,7 @@ void Game::setup_start_objects()
             })
         );
 
-    // wpm
+    // wpm slider
     Rectangle wpm_slider_pos{10, (float)m_height - 100, 150, 50};
     constexpr int wpm_default = 40;
     sliders.push_back(
@@ -97,6 +97,23 @@ void Game::setup_start_objects()
             },
             wpm_default, 1, 170, true)
         );
+
+    // wpm counter
+    Vector2 wpm_stats_pos{10, 30};
+    word_formatters.push_back({
+            {"", tf::col_white, 20, wpm_stats_pos},
+            [](tf::Word_formatter* wf) {
+                sprintf_s(wf->handle.text, wf->handle.text_size,
+                          "wpm %.1f", Game::instance().get_wpm());
+            }
+        });
+    word_formatters.push_back({
+            {"", tf::col_white, 20, {wpm_stats_pos.x, wpm_stats_pos.y + 20}},
+            [](tf::Word_formatter* wf) {
+                sprintf_s(wf->handle.text, wf->handle.text_size,
+                          "adjusted wpm %.1f", Game::instance().get_adjusted_wpm());
+            }
+        });
 
     // Title
     const float tfwidth = MeasureTextEx(m_font, "Type Fast", 50, 0).x;
@@ -152,12 +169,15 @@ void Game::setup_start_objects()
 
 void Game::update()
 {
+    if (IsKeyPressed(KEY_F11)) { ToggleFullscreen(); }
+
     update_audio();
+    update_game_objects();
+    handle_events();
+}
 
-    if (IsKeyPressed(KEY_F11)) {
-        ToggleFullscreen();
-    }
-
+void Game::update_game_objects()
+{
     // Spawn new word
     if (GetTime() - m_wpm_timer > 60.0 / m_wpm) {
         m_wpm_timer = GetTime();
@@ -167,21 +187,8 @@ void Game::update()
     const bool is_left_pressed = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     const bool is_left_down = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     const Vector2 cpos = GetMousePosition();
-    const int last_key = GetKeyPressed();
 
-    Event_word_input* ibox_event;
-    tf::update(m_input_box, last_key, &ibox_event);
-    if (ibox_event) {
-        const auto len = strlen(ibox_event->word);
-        //TODO ugly string allocation
-        std::string typed{ibox_event->word, len};
-        auto it = hscroll_words.find(typed);
-        if (it != hscroll_words.end()) { // entered correct word
-            events.emplace_back(Event_type::word_input, ibox_event);
-            hscroll_words.erase(it);
-        }
-    }
-
+    tf::update(m_input_box, events);
     for (auto& formatter : word_formatters) {
         tf::update(formatter);
     }
@@ -204,8 +211,6 @@ void Game::update()
     for (auto& slider : sliders) {
         tf::update(slider, cpos, is_left_down);
     }
-
-    handle_events();
 }
 
 void Game::update_audio()
@@ -237,7 +242,14 @@ void Game::handle_events()
 
 void Game::on_word_input(const Event& event)
 {
-
+    const auto len = strlen(static_cast<Event_word_input*>(event.data)->word);
+    //TODO ugly string allocation
+    std::string typed{static_cast<Event_word_input*>(event.data)->word, len};
+    auto it = hscroll_words.find(typed);
+    if (it != hscroll_words.end()) { // entered correct word
+        hscroll_words.erase(it);
+        m_wpm_stats.update(len);
+    }
 }
 
 void Game::on_word_missed(const Event& event)
@@ -274,7 +286,7 @@ void Game::spawn_word()
     std::string str = m_wordgen.next();
     tf::Word word{"", tf::col_white, 30, {(float)x_dist(m_re), (float)y_dist(m_re)}};
     strcpy_s(word.text, word.text_size, str.c_str());
-    H_scroll_hl_word obj = {
+    H_scroll<Text_highlightable<Word>> obj = {
         {std::move(word), tf::col_green, 0,
          []() -> const char* {
              return Game::instance().m_input_box.text_input.text.text; }
