@@ -117,7 +117,7 @@ void Game::setup_start_objects()
 
     // Title
     const float tfwidth = MeasureTextEx(m_font, "Type Fast", 50, 0).x;
-    words.push_back({ "Type Fast", tf::col_red, 50, {m_width/2 - tfwidth/2, -5} });
+    words.push_back({ "Type Fast", tf::col_red, 50, {m_width/2 - tfwidth/2, 10} });
 
     // Frametime
     constexpr float fps_x = 120;
