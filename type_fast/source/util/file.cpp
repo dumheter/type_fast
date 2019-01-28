@@ -24,44 +24,45 @@
 
 #include "file.hpp"
 
+// allow us to use fopen
+#pragma warning(disable : 4996)
+
 namespace tf
 {
 
 File::File(const std::string& path)
 {
-    FILE* file;
-    errno_t fopen_s_res = fopen_s(&file, path.c_str(), "rb");
-    constexpr errno_t FOPEN_S_SUCCESS = 0;
-    if (fopen_s_res == FOPEN_S_SUCCESS) {
+    FILE* file = fopen(path.c_str(), "rb");
+    if (file) {
         int res = fseek(file, 0, SEEK_END);
         constexpr int SEEK_SUCCESS = 0;
         if (res == SEEK_SUCCESS) {
 
-            m_size = ftell(file);
-            constexpr long FTELL_FAIL = -1L;
-            if (m_size != FTELL_FAIL) {
+            this->size = ftell(file);
+            constexpr size_t FTELL_FAIL = -1L;
+            if (this->size != FTELL_FAIL) {
 
                 rewind(file);
-                m_buf = new char[m_size+1];
-                const long long bytes = fread(m_buf, 1, m_size, file);
-                if (bytes == m_size) {
-                    m_buf[m_size] = 0; // null terminate
-                    m_error = FileError::NO_ERROR;
+                this->buf = new char[this->size+1];
+                const size_t bytes = fread(this->buf, 1, this->size, file);
+                if (bytes == this->size) {
+                    this->buf[this->size] = 0; // null terminate
+                    this->error = FileError::NO_ERROR;
                 }
                 else {
-                    m_error = FileError::FAILED_TO_READ;
+                    this->error = FileError::FAILED_TO_READ;
                 }
             }
             else {
-                m_error = FileError::FAILED_TO_GET_POS;
+                this->error = FileError::FAILED_TO_GET_POS;
             }
         }
         else {
-            m_error = FileError::FAILED_TO_SEEK;
+            this->error = FileError::FAILED_TO_SEEK;
         }
     }
     else {
-        m_error = FileError::CANNOT_OPEN_PATH;
+        this->error = FileError::CANNOT_OPEN_PATH;
     }
 
     if (file) {
@@ -71,12 +72,12 @@ File::File(const std::string& path)
 
 File::~File()
 {
-    delete[] m_buf;
+    delete[] this->buf;
 }
 
 std::string File::error_to_string() const
 {
-    switch (m_error)
+    switch (this->error)
     {
     case FileError::NO_ERROR: {
         return "NO_ERROR";
@@ -99,6 +100,14 @@ std::string File::error_to_string() const
     }
 
     return "UNKNOWN_ERROR"; // have to repeat myself
+}
+
+bool File::file_exists(const std::string& path)
+{
+    FILE* file = fopen(path.c_str(), "rb");
+    bool exists = file;
+    if (file) { fclose(file); }
+    return exists;
 }
 
 }

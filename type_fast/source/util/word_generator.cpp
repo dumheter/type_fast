@@ -37,8 +37,8 @@ Word_generator::Word_generator(const File& file, const DelimSettings& settings)
 void Word_generator::load(const File& file, const DelimSettings& settings)
 {
     const char* text = file.get();
-    const auto text_size = file.size();
-    m_strlist.reserve(text_size/4); // might use extra space, but we can afford it
+    const auto text_size = file.get_size();
+    m_strlist.reserve(text_size/4); // might use extra space, but that's a sacrifice I'm willing to make
 
     u64 end, offset = 0;
     while (offset < text_size) {

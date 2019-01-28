@@ -142,7 +142,9 @@ void Game::setup_start_objects()
         });
 
     // Music
-    music = Tfmusic{"res/audio/joy_of_painting.ogg"};
+    const std::string joy_of_painting_path{"res/audio/joy_of_painting.ogg"};
+    if (File::file_exists(joy_of_painting_path)) { music = Tfmusic{joy_of_painting_path}; }
+    else { music = Tfmusic{"res/audio/default.ogg"}; }
     music.play();
 
     // Volume slider
@@ -360,7 +362,7 @@ void Game::load_word_generator(const char* wordfile)
     }
     sw.stop();
     printf("load file: %.2f ms\n", sw.fnow_ms());
-    printf("file size: %llu\n", file.size());
+    printf("file size: %llu\n", file.get_size());
 
     sw.start();
     DelimSettings settings{ true, false, false, false, false };

@@ -57,6 +57,7 @@ public:
     Tfmusic() = default;
 
     explicit Tfmusic(const char* music_path);
+	explicit Tfmusic(const std::string& music_path) : Tfmusic(music_path.c_str()) {}
 
     Tfmusic(const Tfmusic& other) = delete;
     Tfmusic& operator=(const Tfmusic& other) = delete;
@@ -64,7 +65,6 @@ public:
     Tfmusic(Tfmusic&& other)
         : m_music(other.m_music), m_name(other.m_name) {}
     Tfmusic& operator=(Tfmusic&& other);
-
 
     ~Tfmusic();
 
